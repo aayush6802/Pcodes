@@ -278,39 +278,201 @@
 //     return 0;
 // }
 // 
-// // LCS******************
-// /* A Top-Down DP implementation of LCS problem */
+
+// // MCM***********
+// // See the Cormen book for details of the
+// // following algorithm
 // #include <bits/stdc++.h>
 // using namespace std;
-
-// /* Returns length of LCS for X[0..m-1], Y[0..n-1] */
-// int lcs(char* X, char* Y, int m, int n,
-// 		vector<vector<int> >& dp)
+// // Matrix Ai has dimension p[i-1] x p[i]
+// // for i = 1..n
+// int MatrixChainOrder(int p[], int n)
 // {
-// 	if (m == 0 || n == 0)
-// 		return 0;
-// 	if (X[m - 1] == Y[n - 1])
-// 		return dp[m][n] = 1 + lcs(X, Y, m - 1, n - 1, dp);
-
-// 	if (dp[m][n] != -1) {
-// 		return dp[m][n];
+// 	int m[n][n];
+// 	int i, j, k, L, q;
+// 	for (i = 1; i < n; i++)
+// 		m[i][i] = 0;
+// 	for (L = 2; L < n; L++)
+// 	{
+// 		for (i = 1; i < n - L + 1; i++)
+// 		{
+// 			j = i + L - 1;
+// 			m[i][j] = INT_MAX;
+// 			for (k = i; k <= j - 1; k++)
+// 			{
+// 				// q = cost/scalar multiplications
+// 				q = m[i][k] + m[k + 1][j]
+// 					+ p[i - 1] * p[k] * p[j];
+// 				if (q < m[i][j])
+// 					m[i][j] = q;
+// 			}
+// 		}
 // 	}
-// 	return dp[m][n] = max(lcs(X, Y, m, n - 1, dp),
-// 						lcs(X, Y, m - 1, n, dp));
+// 	return m[1][n - 1];
+// }
+// // Driver Code
+// int main()
+// {
+// 	int arr[] = { 1, 2, 3, 4 };
+// 	int size = sizeof(arr) / sizeof(arr[0]);
+// 	cout << "Minimum number of multiplications is "
+// 		<< MatrixChainOrder(arr, size);
+// 	getchar();
+// 	return 0;
 // }
 
-// /* Driver code */
+// // LCS******************
+// /* Dynamic Programming C implementation of LCS problem */
+// #include <bits/stdc++.h>
+// using namespace std;
+// /* Returns length of LCS for X[0..m-1], Y[0..n-1] */
+// int lcs(char *X, char *Y, int m, int n)
+// {
+// 	// intitalizing a matrix of size (m+1)*(n+1)
+// 	int L[m + 1][n + 1];
+// 	/* Following steps build L[m+1][n+1] in bottom up fashion. Note
+// 		that L[i][j] contains length of LCS of X[0..i-1] and Y[0..j-1] */
+// 	for (int i = 0; i <= m; i++)
+// 	{
+// 		for (int j = 0; j <= n; j++)
+// 		{
+// 			if (i == 0 || j == 0)
+// 				L[i][j] = 0;
+// 			else if (X[i - 1] == Y[j - 1])
+// 				L[i][j] = L[i - 1][j - 1] + 1;
+// 			else
+// 				L[i][j] = max(L[i - 1][j], L[i][j - 1]);
+// 		}
+// 	}
+// 	// L[m][n] contains length of LCS for X[0..n-1] and Y[0..m-1]
+// 	return L[m][n];
+// }
+// // Driver program to test above function
 // int main()
 // {
 // 	char X[] = "AGGTAB";
 // 	char Y[] = "GXTXAYB";
-
 // 	int m = strlen(X);
 // 	int n = strlen(Y);
-// 	vector<vector<int> > dp(m + 1, vector<int>(n + 1, -1));
-// 	cout << "Length of LCS is " << lcs(X, Y, m, n, dp);
-
+// 	cout << "Length of LCS is: " << lcs(X, Y, m, n);
 // 	return 0;
 // }
+// // code submitted by Aditya Yadav (adityayadav012552)
+
+// // OBST 
+// // Dynamic Programming code for Optimal Binary Search
+// // Tree Problem
+// #include <bits/stdc++.h>
+// using namespace std;
+
+// // A utility function to get sum of array elements
+// // freq[i] to freq[j]
+// int sum(int freq[], int i, int j);
+
+// /* A Dynamic Programming based function that calculates
+// minimum cost of a Binary Search Tree. */
+// int optimalSearchTree(int keys[], int freq[], int n)
+// {
+// 	/* Create an auxiliary 2D matrix to store results
+// 	of subproblems */
+// 	int cost[n][n];
+
+// 	/* cost[i][j] = Optimal cost of binary search tree
+// 	that can be formed from keys[i] to keys[j].
+// 	cost[0][n-1] will store the resultant cost */
+
+// 	// For a single key, cost is equal to frequency of the key
+// 	for (int i = 0; i < n; i++)
+// 		cost[i][i] = freq[i];
+
+// 	// Now we need to consider chains of length 2, 3, ... .
+// 	// L is chain length.
+// 	for (int L = 2; L <= n; L++)
+// 	{
+// 		// i is row number in cost[][]
+// 		for (int i = 0; i <= n-L+1; i++)
+// 		{
+// 			// Get column number j from row number i and
+// 			// chain length L
+// 			int j = i+L-1;
+// 			cost[i][j] = INT_MAX;
+// 			int off_set_sum = sum(freq, i, j);
+
+// 			// Try making all keys in interval keys[i..j] as root
+// 			for (int r = i; r <= j; r++)
+// 			{
+// 			// c = cost when keys[r] becomes root of this subtree
+// 			int c = ((r > i)? cost[i][r-1]:0) +
+// 					((r < j)? cost[r+1][j]:0) +
+// 					off_set_sum;
+// 			if (c < cost[i][j])
+// 				cost[i][j] = c;
+// 			}
+// 		}
+// 	}
+// 	return cost[0][n-1];
+// }
+
+// // A utility function to get sum of array elements
+// // freq[i] to freq[j]
+// int sum(int freq[], int i, int j)
+// {
+// 	int s = 0;
+// 	for (int k = i; k <= j; k++)
+// 	s += freq[k];
+// 	return s;
+// }
+
+// // Driver code
+// int main()
+// {
+// 	int keys[] = {10, 12, 20};
+// 	int freq[] = {34, 8, 50};
+// 	int n = sizeof(keys)/sizeof(keys[0]);
+// 	cout << "Cost of Optimal BST is " << optimalSearchTree(keys, freq, n);
+// 	return 0;
+// }
+
+// // 0-1 knapsack
+// // A dynamic programming based
+// // solution for 0-1 Knapsack problem
+// #include <bits/stdc++.h>
+// using namespace std;
+// // A utility function that returns
+// // maximum of two integers
+// int max(int a, int b) { return (a > b) ? a : b; }
+// // Returns the maximum value that
+// // can be put in a knapsack of capacity W
+// int knapSack(int W, int wt[], int val[], int n)
+// {
+// 	int i, w;
+// 	vector<vector<int> > K(n + 1, vector<int>(W + 1));
+// 	// Build table K[][] in bottom up manner
+// 	for (i = 0; i <= n; i++) {
+// 		for (w = 0; w <= W; w++) {
+// 			if (i == 0 || w == 0)
+// 				K[i][w] = 0;
+// 			else if (wt[i - 1] <= w)
+// 				K[i][w] = max(val[i - 1]
+// 								+ K[i - 1][w - wt[i - 1]],
+// 							K[i - 1][w]);
+// 			else
+// 				K[i][w] = K[i - 1][w];
+// 		}
+// 	}
+// 	return K[n][W];
+// }
+// // Driver Code
+// int main()
+// {
+// 	int val[] = { 60, 100, 120 };
+// 	int wt[] = { 10, 20, 30 };
+// 	int W = 50;
+// 	int n = sizeof(val) / sizeof(val[0]);
+// 	cout << knapSack(W, wt, val, n);
+// 	return 0;
+// }
+
+
 
 
